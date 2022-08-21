@@ -1,6 +1,6 @@
 # Ecommerce
 
-This is an example project to illustrate an implementation of Ecommerce using Django
+This is an implementation of Ecommerce using Django
 
 
 
