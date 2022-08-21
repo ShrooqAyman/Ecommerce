@@ -1,4 +1,4 @@
-# Ecommerce# LMS
+# Ecommerce
 
 This is an example project to illustrate an implementation of Ecommerce using Django
 
