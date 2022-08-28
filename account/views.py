@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from .forms import RegistrationForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
-from .forms import RegistrationForm
+from .forms import RegistrationForm,UserEditForm
 from django.utils.encoding import force_bytes,force_str
 from .token import account_activation_token
 from .models import UserBase
@@ -44,7 +44,6 @@ def account_register(request):
         registerForm =RegistrationForm()
     return render(request, 'account/regestration/register.html', {'form':registerForm})
 
-
 def activate_account(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -58,3 +57,23 @@ def activate_account(request, uidb64, token):
         return redirect('account:dashboard')
     else:
         return render(request, 'account/regestration/activation_invalid.html')
+
+@login_required
+def edit_details(request):
+    if request.method == 'POST':
+        user_form = UserEditForm(instance =request.user,  data = request.POST)
+
+        if user_form.is_valid():
+            user_form.save()
+    else:
+        user_form = UserEditForm(instance =request.user)
+
+    return render(request, 'account/user/edit_details.html', {'user_form':user_form})
+
+@login_required
+def delete_user(request):
+    user = UserBase.objects.get(user_name=request.user)
+    user.is_active = False
+    user.save()
+    logout(request)
+    return redirect('account:delete_confirmation')

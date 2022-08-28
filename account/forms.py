@@ -3,8 +3,7 @@ import email
 from re import U
 from django import forms
 from .models import UserBase
-from django.contrib.auth.forms import AuthenticationForm
-
+from django.contrib.auth.forms import AuthenticationForm,PasswordResetForm,SetPasswordForm
 
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control mb-3', 'placeholder':'Username', 'id':'login-username'}))
@@ -38,3 +37,31 @@ class RegistrationForm(forms.ModelForm):
         if UserBase.objects.filter(email=email).exists():
             raise forms.ValidationError('please use another email, that is already taken')
         return email
+
+
+class UserEditForm(forms.ModelForm):
+    email = forms.EmailField(label='Account Email(can not be changed )', widget=forms.TextInput(attrs={'class':'form-control mb-3', 'placeholder':'email', 'id':'email' ,'readonly':'readonly'}))
+    user_name = forms.CharField(label='username',widget=forms.TextInput(attrs={'class':'form-control mb-3', 'placeholder':'Username', 'id':'user_name'}))
+    first_name = forms.CharField(label='first name',widget=forms.TextInput(attrs={'class':'form-control mb-3', 'placeholder':'First Name', 'id':'first_name'}))
+
+    class Meta:
+        model = UserBase
+        fields = ('user_name', 'email', 'first_name')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['user_name'].required = True
+        self.fields['email'].required = True
+
+
+class PwdResetForm(PasswordResetForm):
+    email = forms.EmailField(label=' Email', widget=forms.TextInput(attrs={'class':'form-control mb-3', 'placeholder':'email', 'id':'email'}))
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if not (UserBase.objects.filter(email=email)):
+            raise forms.ValidationError('unfortunately we can not find that email address')
+        return email
+    
+class PwdResetConfirmForm(SetPasswordForm):
+    new_password = forms.CharField(label=' Password',widget=forms.PasswordInput(attrs={'class':'form-control mb-3', 'placeholder':'Password', 'id':'pwd1'}))
+    new_password2 = forms.CharField(label='Repeat Password',widget=forms.PasswordInput(attrs={'class':'form-control mb-3', 'placeholder':'Repeat Password', 'id':'pwd2'}))
